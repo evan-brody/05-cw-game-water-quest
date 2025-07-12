@@ -1,6 +1,13 @@
 // Game configuration and state variables
-const WINNING_SCORE = 20;
-const GAME_TIME = 30; // seconds
+const DIFFICULTY_SETTINGS = {
+  easy:   { WINNING_SCORE: 12, GAME_TIME: 40 },
+  normal: { WINNING_SCORE: 20, GAME_TIME: 30 },
+  hard:   { WINNING_SCORE: 28, GAME_TIME: 18 }
+};
+
+let currentDifficulty = 'normal';
+let WINNING_SCORE = DIFFICULTY_SETTINGS[currentDifficulty].WINNING_SCORE;
+let GAME_TIME = DIFFICULTY_SETTINGS[currentDifficulty].GAME_TIME;
 
 const winningMessages = [
   "Amazing! You brought clean water to a whole village!",
@@ -26,6 +33,7 @@ const timerDisplay = document.getElementById('timer');
 const achievements = document.getElementById('achievements');
 const startBtn = document.getElementById('start-game');
 const grid = document.querySelector('.game-grid');
+const difficultySelect = document.getElementById('difficulty');
 
 // Create a responsive 3x3 grid
 function createGrid() {
@@ -96,11 +104,38 @@ function showEndMessage() {
   }
 }
 
+// Update UI for current difficulty
+function updateDifficultyUI() {
+  document.querySelector('.game-instructions').textContent =
+    `Collect ${WINNING_SCORE} items to complete the game!`;
+  timerDisplay.textContent = GAME_TIME;
+}
+
+// Handle difficulty change
+if (difficultySelect) {
+  difficultySelect.addEventListener('change', () => {
+    currentDifficulty = difficultySelect.value;
+    WINNING_SCORE = DIFFICULTY_SETTINGS[currentDifficulty].WINNING_SCORE;
+    GAME_TIME = DIFFICULTY_SETTINGS[currentDifficulty].GAME_TIME;
+    if (!gameActive) {
+      updateDifficultyUI();
+      cansDisplay.textContent = 0;
+      achievements.textContent = '';
+      achievements.style.display = 'none';
+    }
+  });
+}
+
 // Start the game
 function startGame() {
   if (gameActive) return;
+  // Set difficulty values at game start
+  currentDifficulty = difficultySelect ? difficultySelect.value : 'normal';
+  WINNING_SCORE = DIFFICULTY_SETTINGS[currentDifficulty].WINNING_SCORE;
+  GAME_TIME = DIFFICULTY_SETTINGS[currentDifficulty].GAME_TIME;
   score = 0;
   timeLeft = GAME_TIME;
+  updateDifficultyUI();
   updateScore(false);
   updateTimer();
   achievements.textContent = '';
@@ -138,5 +173,6 @@ window.addEventListener('resize', () => {
 // DOMContentLoaded: setup grid and event listeners
 document.addEventListener('DOMContentLoaded', () => {
   createGrid();
+  updateDifficultyUI();
   startBtn.addEventListener('click', startGame);
 });
